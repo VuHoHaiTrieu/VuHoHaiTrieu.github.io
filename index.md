@@ -3,7 +3,7 @@ layout: default
 title: "Trang chủ"
 ---
 
-# Hi.Chào mừng đến blog của VuHoHaiTrieu 👋
+# Hi. Chào mừng đến blog của VuHoHaiTrieu 👋
 
 Đây là blog của mình — viết bằng Markdown. Dưới đây là danh sách bài viết:
 
