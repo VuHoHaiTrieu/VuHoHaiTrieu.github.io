@@ -1,40 +1,61 @@
+/* Nền gradient động */
 body {
-  font-family: 'Quicksand', sans-serif;
-  background: #fff0f6;
-  color: #333;
-  text-align: center;
   margin: 0;
-  padding: 0;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  background: linear-gradient(-45deg, #6a11cb, #2575fc, #6a11cb, #2575fc);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
-header {
-  background: #ffb6c1;
-  padding: 20px;
-  font-family: 'Pacifico', cursive;
-  color: #fff;
+@keyframes gradientBG {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
 }
 
-.card {
-  background: #fff;
-  margin: 20px auto;
-  padding: 20px;
-  width: 300px;
-  border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+/* Tiêu đề lung linh */
+#title {
+  font-size: 3em;
+  color: white;
+  text-shadow: 0 0 10px #fff, 0 0 20px #6a11cb, 0 0 30px #2575fc;
+  animation: glow 2s infinite alternate;
 }
 
-a {
-  color: #ff69b4;
-  text-decoration: none;
-  font-weight: bold;
+@keyframes glow {
+  from { text-shadow: 0 0 10px #6a11cb, 0 0 20px #2575fc; }
+  to { text-shadow: 0 0 20px #2575fc, 0 0 30px #6a11cb; }
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
-footer {
+/* Nút pháo hoa */
+#btn {
   margin-top: 20px;
-  padding: 10px;
-  background: #ffe4e1;
+  padding: 15px 30px;
+  font-size: 18px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(45deg, #6a11cb, #2575fc);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+#btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255,255,255,0.8);
+}
+
+/* Canvas pháo hoa full màn hình */
+#fireworks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
