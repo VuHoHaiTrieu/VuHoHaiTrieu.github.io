@@ -6,16 +6,20 @@ canvas.height = window.innerHeight;
 const hearts = [];
 const particles = [];
 let mouse = { x: null, y: null };
-const isMobile = /Mobi|Android/i.test(navigator.userAgent); // Phát hiện di động
+const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+let heartCount = 0;
+const countElement = document.getElementById("count");
+const darkModeToggle = document.getElementById("dark-mode-toggle");
+const toggleIcon = darkModeToggle.querySelector(".icon");
 
 class Heart {
   constructor() {
     this.x = Math.random() * canvas.width;
     this.y = canvas.height + 50;
-    this.size = Math.random() * (isMobile ? 30 : 40) + (isMobile ? 20 : 25); // Nhỏ hơn trên di động
+    this.size = Math.random() * (isMobile ? 30 : 40) + (isMobile ? 20 : 25);
     this.baseSize = this.size;
     this.speedY = -(Math.random() * 2 + 1.5);
-    this.colorHsl = { h: Math.random() * 100 + 200, s: 85, l: 65 };
+    this.colorHsl = { h: Math.random() * 100 + 200, s: 85, l: document.body.classList.contains("dark-mode") ? 40 : 65 }; // Tối hơn ở dark mode
     this.angle = Math.random() * 0.03;
     this.glow = 0;
     this.rotation = 0;
@@ -31,11 +35,10 @@ class Heart {
       this.x = Math.random() * canvas.width;
     }
 
-    // Hiệu ứng hover/chạm
     const dx = mouse.x - this.x;
     const dy = mouse.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < this.size + (isMobile ? 30 : 20)) { // Vùng chạm lớn hơn trên di động
+    if (distance < this.size + (isMobile ? 30 : 20)) {
       this.size = this.baseSize * (isMobile ? 1.4 : 1.3);
       this.glow += isMobile ? 10 : 15;
     } else {
@@ -47,7 +50,6 @@ class Heart {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rotation);
 
-    // Gradient cho hiệu ứng 3D
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
     gradient.addColorStop(0, 'rgba(255,255,255,0.9)');
     gradient.addColorStop(1, `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`);
@@ -69,7 +71,6 @@ class Heart {
     ctx.shadowColor = `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`;
     ctx.fill();
 
-    // Thêm highlight cho 3D
     ctx.beginPath();
     ctx.arc(-this.size / 4, -this.size / 4, this.size / 4, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
@@ -140,9 +141,16 @@ class TextParticle {
 }
 
 function init() {
-  const heartCount = isMobile ? 20 : 40; // Giảm số trái tim trên di động
-  for (let i = 0; i < heartCount; i++) {
+  const heartCountInit = isMobile ? 20 : 40;
+  for (let i = 0; i < heartCountInit; i++) {
     hearts.push(new Heart());
+  }
+
+  // Khôi phục chế độ tối từ localStorage
+  if (localStorage.getItem("darkMode") === "enabled") {
+    document.body.classList.add("dark-mode");
+    toggleIcon.textContent = "🌙";
+    hearts.forEach(heart => heart.colorHsl.l = 40);
   }
 }
 
@@ -170,7 +178,7 @@ function createTextExplosion(x, y) {
   text.style.top = `${y}px`;
   document.body.appendChild(text);
 
-  const colorHsl = { h: Math.random() * 100 + 200, s: 85, l: 65 };
+  const colorHsl = { h: Math.random() * 100 + 200, s: 85, l: document.body.classList.contains("dark-mode") ? 40 : 65 };
   for (let i = 0; i < (isMobile ? 10 : 20); i++) {
     particles.push(new TextParticle(x, y, colorHsl));
   }
@@ -188,48 +196,56 @@ function createExplosion(x, y, colorHsl) {
   }
 }
 
+function handleExplosion(e, isTouch = false) {
+  const rect = canvas.getBoundingClientRect();
+  const eventX = isTouch ? e.touches[0].clientX : e.clientX;
+  const eventY = isTouch ? e.touches[0].clientY : e.clientY;
+  mouse.x = eventX - rect.left;
+  mouse.y = eventY - rect.top;
+
+  let exploded = false;
+  for (let i = 0; i < hearts.length; i++) {
+    const heart = hearts[i];
+    const dx = mouse.x - heart.x;
+    const dy = mouse.y - heart.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < heart.size + (isMobile ? 30 : 20)) {
+      createExplosion(heart.x, heart.y, heart.colorHsl);
+      createTextExplosion(mouse.x, mouse.y);
+      hearts.splice(i, 1);
+      hearts.push(new Heart());
+      heartCount++;
+      countElement.textContent = heartCount;
+      exploded = true;
+      break; // Chỉ nổ một quả bóng
+    }
+  }
+  if (isTouch && exploded) {
+    e.preventDefault();
+  }
+}
+
 canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
   mouse.x = e.clientX - rect.left;
   mouse.y = e.clientY - rect.top;
 });
 
-canvas.addEventListener("touchstart", (e) => {
-  e.preventDefault(); // Ngăn scroll trên di động
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  mouse.x = touch.clientX - rect.left;
-  mouse.y = touch.clientY - rect.top;
+canvas.addEventListener("click", (e) => handleExplosion(e));
 
-  hearts.forEach((heart, index) => {
-    const dx = mouse.x - heart.x;
-    const dy = mouse.y - heart.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < heart.size + 30) {
-      createExplosion(heart.x, heart.y, heart.colorHsl);
-      createTextExplosion(mouse.x, mouse.y);
-      hearts.splice(index, 1);
-      hearts.push(new Heart());
-    }
-  });
-});
+canvas.addEventListener("touchstart", (e) => handleExplosion(e, true));
 
-canvas.addEventListener("click", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  mouse.x = e.clientX - rect.left;
-  mouse.y = e.clientY - rect.top;
-
-  hearts.forEach((heart, index) => {
-    const dx = mouse.x - heart.x;
-    const dy = mouse.y - heart.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < heart.size + 20) {
-      createExplosion(heart.x, heart.y, heart.colorHsl);
-      createTextExplosion(mouse.x, mouse.y);
-      hearts.splice(index, 1);
-      hearts.push(new Heart());
-    }
-  });
+darkModeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+  if (document.body.classList.contains("dark-mode")) {
+    localStorage.setItem("darkMode", "enabled");
+    toggleIcon.textContent = "🌙";
+    hearts.forEach(heart => heart.colorHsl.l = 40);
+  } else {
+    localStorage.setItem("darkMode", "disabled");
+    toggleIcon.textContent = "☀️";
+    hearts.forEach(heart => heart.colorHsl.l = 65);
+  }
 });
 
 window.addEventListener("resize", () => {
