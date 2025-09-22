@@ -3,29 +3,30 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const bubbles = [];
+const hearts = [];
 const particles = [];
-let mouse = { x: null, y: null };
+let mouse = { x: 0, y: 0 };
 
-class Bubble {
+class Heart {
   constructor() {
     this.x = Math.random() * canvas.width;
     this.y = canvas.height + 50;
-    this.size = Math.random() * 40 + 25;
+    this.size = Math.random() * 35 + 25;
     this.baseSize = this.size;
-    this.speedY = -(Math.random() * 2.5 + 1.5);
-    this.color = `hsl(${Math.random() * 100 + 200}, 80%, 60%)`; // Mở rộng dải màu: xanh dương, tím, hồng
+    this.speedY = -(Math.random() * 4 + 3);
+    this.colorHsl = { h: Math.random() * 120 + 200, s: 80, l: 60 }; // Lưu dưới dạng object để dễ chuyển rgb
     this.angle = Math.random() * 0.03;
-    this.glow = 10;
+    this.glow = 0;
     this.rotation = 0;
+    this.hover = false;
   }
   update() {
     this.y += this.speedY;
-    this.x += Math.sin(this.angle += 0.025) * 2.5; // Chuyển động lắc lư mượt hơn
-    this.glow = Math.sin(Date.now() * 0.003) * 15 + 15; // Phát sáng nhấp nháy mượt
-    this.rotation += 0.005; // Xoay nhẹ để ảo diệu
-    if (this.y < -this.size) {
-      this.y = canvas.height + this.size;
+    this.x += Math.sin(this.angle += 0.03) * 3;
+    this.rotation += 0.01;
+    this.glow = Math.sin(Date.now() * 0.003) * 15 + 15;
+    if (this.y < -this.size * 2) {
+      this.y = canvas.height + this.size * 2;
       this.x = Math.random() * canvas.width;
     }
 
@@ -34,7 +35,7 @@ class Bubble {
     const dy = mouse.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     if (distance < this.size + 20) {
-      this.size = this.baseSize * 1.2; // Phóng to khi hover
+      this.size = this.baseSize * 1.2;
       this.glow += 10;
     } else {
       this.size = this.baseSize;
@@ -47,11 +48,10 @@ class Bubble {
 
     // Gradient cho hiệu ứng 3D
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
-    gradient.addColorStop(0, `rgba(255,255,255,0.8)`);
-    gradient.addColorStop(1, this.color);
+    gradient.addColorStop(0, 'rgba(255,255,255,0.8)');
+    gradient.addColorStop(1, `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`);
 
     ctx.beginPath();
-    // Vẽ trái tim đẹp hơn với bezier curves mượt
     ctx.moveTo(0, -this.size / 2);
     ctx.bezierCurveTo(
       -this.size, -this.size * 0.8,
@@ -65,7 +65,7 @@ class Bubble {
     );
     ctx.fillStyle = gradient;
     ctx.shadowBlur = this.glow;
-    ctx.shadowColor = this.color;
+    ctx.shadowColor = `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`;
     ctx.fill();
 
     // Thêm highlight cho 3D
@@ -79,40 +79,47 @@ class Bubble {
 }
 
 class Particle {
-  constructor(x, y, color) {
+  constructor(x, y, colorHsl) {
     this.x = x;
     this.y = y;
-    this.size = Math.random() * 5 + 2;
-    this.speedX = Math.random() * 6 - 3;
-    this.speedY = Math.random() * 6 - 3;
+    this.size = Math.random() * 6 + 3;
+    this.speedX = Math.random() * 8 - 4;
+    this.speedY = Math.random() * 8 - 4;
     this.opacity = 1;
-    this.color = color;
+    this.colorHsl = colorHsl;
+    this.glow = Math.random() * 10 + 5;
   }
   update() {
     this.x += this.speedX;
     this.y += this.speedY;
-    this.opacity -= 0.02;
-    this.size *= 0.98; // Thu nhỏ dần
+    this.opacity -= 0.015; // Chậm fade hơn để đẹp
+    this.size *= 0.97; // Thu nhỏ mượt hơn
+    this.speedX *= 0.98; // Chậm dần để tự nhiên
+    this.speedY *= 0.98;
   }
   draw() {
+    ctx.save();
+    ctx.shadowBlur = this.glow;
+    ctx.shadowColor = `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${this.color.replace('hsl(', '').replace(')', '')}, ${this.opacity})`;
+    ctx.fillStyle = `hsla(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%, ${this.opacity})`;
     ctx.fill();
+    ctx.restore();
   }
 }
 
 function init() {
-  for (let i = 0; i < 40; i++) { // Tăng số lượng bong bóng
-    bubbles.push(new Bubble());
+  for (let i = 0; i < 40; i++) {
+    hearts.push(new Heart());
   }
 }
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  bubbles.forEach(b => {
-    b.update();
-    b.draw();
+  hearts.forEach(h => {
+    h.update();
+    h.draw();
   });
   particles.forEach((p, index) => {
     p.update();
@@ -133,14 +140,14 @@ function createTextExplosion(x, y) {
   document.body.appendChild(text);
 
   gsap.fromTo(text, 
-    { scale: 0, opacity: 1, rotation: Math.random() * 360 - 180 },
-    { scale: 2, opacity: 0, duration: 1.2, ease: "power3.out", onComplete: () => text.remove() }
+    { scale: 0.5, opacity: 1, rotation: Math.random() * 180 - 90 },
+    { scale: 2.5, opacity: 0, duration: 1.8, ease: "power3.out", onComplete: () => text.remove() }
   );
 }
 
-function createExplosion(x, y, color) {
-  for (let i = 0; i < 30; i++) {
-    particles.push(new Particle(x, y, color));
+function createExplosion(x, y, colorHsl) {
+  for (let i = 0; i < 40; i++) { // Tăng số particles cho đẹp hơn
+    particles.push(new Particle(x, y, colorHsl));
   }
 }
 
@@ -155,15 +162,15 @@ canvas.addEventListener("click", (e) => {
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
 
-  bubbles.forEach((bubble, index) => {
-    const dx = mouseX - bubble.x;
-    const dy = mouseY - bubble.y;
+  hearts.forEach((heart, index) => {
+    const dx = mouseX - heart.x;
+    const dy = mouseY - heart.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < bubble.size) {
-      createExplosion(bubble.x, bubble.y, bubble.color);
+    if (distance < heart.size) {
+      createExplosion(heart.x, heart.y, heart.colorHsl);
       createTextExplosion(mouseX, mouseY);
-      bubbles.splice(index, 1);
-      bubbles.push(new Bubble());
+      hearts.splice(index, 1);
+      hearts.push(new Heart());
     }
   });
 });
