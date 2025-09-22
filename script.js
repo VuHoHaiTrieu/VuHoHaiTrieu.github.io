@@ -6,15 +6,16 @@ canvas.height = window.innerHeight;
 const hearts = [];
 const particles = [];
 let mouse = { x: null, y: null };
+const isMobile = /Mobi|Android/i.test(navigator.userAgent); // Phát hiện di động
 
 class Heart {
   constructor() {
     this.x = Math.random() * canvas.width;
     this.y = canvas.height + 50;
-    this.size = Math.random() * 40 + 30;
+    this.size = Math.random() * (isMobile ? 30 : 40) + (isMobile ? 20 : 25); // Nhỏ hơn trên di động
     this.baseSize = this.size;
-    this.speedY = -(Math.random() * 3 + 2);
-    this.colorHsl = { h: Math.random() * 100 + 200, s: 85, l: 65 }; // Màu sáng hơn
+    this.speedY = -(Math.random() * 2 + 1.5);
+    this.colorHsl = { h: Math.random() * 100 + 200, s: 85, l: 65 };
     this.angle = Math.random() * 0.03;
     this.glow = 0;
     this.rotation = 0;
@@ -22,21 +23,21 @@ class Heart {
   }
   update() {
     this.y += this.speedY;
-    this.x += Math.sin(this.angle += 0.025) * 2.5;
+    this.x += Math.sin(this.angle += 0.025) * 2;
     this.rotation += 0.01;
-    this.glow = Math.sin(Date.now() * 0.004) * 20 + 20;
+    this.glow = Math.sin(Date.now() * 0.004) * (isMobile ? 15 : 20) + (isMobile ? 15 : 20);
     if (this.y < -this.size * 2) {
       this.y = canvas.height + this.size * 2;
       this.x = Math.random() * canvas.width;
     }
 
-    // Hiệu ứng hover
+    // Hiệu ứng hover/chạm
     const dx = mouse.x - this.x;
     const dy = mouse.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < this.size + 20) {
-      this.size = this.baseSize * 1.3;
-      this.glow += 15;
+    if (distance < this.size + (isMobile ? 30 : 20)) { // Vùng chạm lớn hơn trên di động
+      this.size = this.baseSize * (isMobile ? 1.4 : 1.3);
+      this.glow += isMobile ? 10 : 15;
     } else {
       this.size = this.baseSize;
     }
@@ -82,18 +83,18 @@ class Particle {
   constructor(x, y, colorHsl) {
     this.x = x;
     this.y = y;
-    this.size = Math.random() * 7 + 4;
-    this.speedX = Math.random() * 10 - 5;
-    this.speedY = Math.random() * 10 - 5;
+    this.size = Math.random() * (isMobile ? 5 : 7) + (isMobile ? 3 : 4);
+    this.speedX = Math.random() * (isMobile ? 8 : 10) - (isMobile ? 4 : 5);
+    this.speedY = Math.random() * (isMobile ? 8 : 10) - (isMobile ? 4 : 5);
     this.opacity = 1;
     this.colorHsl = colorHsl;
-    this.glow = Math.random() * 15 + 10;
+    this.glow = Math.random() * (isMobile ? 10 : 15) + (isMobile ? 5 : 10);
   }
   update() {
     this.x += this.speedX;
     this.y += this.speedY;
-    this.opacity -= 0.012; // Fade chậm hơn
-    this.size *= 0.96; // Thu nhỏ mượt
+    this.opacity -= isMobile ? 0.015 : 0.012;
+    this.size *= isMobile ? 0.97 : 0.96;
     this.speedX *= 0.97;
     this.speedY *= 0.97;
   }
@@ -113,17 +114,17 @@ class TextParticle {
   constructor(x, y, colorHsl) {
     this.x = x;
     this.y = y;
-    this.size = Math.random() * 3 + 2;
-    this.speedX = Math.random() * 6 - 3;
-    this.speedY = Math.random() * 6 - 3;
+    this.size = Math.random() * (isMobile ? 2 : 3) + 2;
+    this.speedX = Math.random() * (isMobile ? 4 : 6) - (isMobile ? 2 : 3);
+    this.speedY = Math.random() * (isMobile ? 4 : 6) - (isMobile ? 2 : 3);
     this.opacity = 1;
     this.colorHsl = colorHsl;
-    this.glow = Math.random() * 10 + 5;
+    this.glow = Math.random() * (isMobile ? 8 : 10) + 5;
   }
   update() {
     this.x += this.speedX;
     this.y += this.speedY;
-    this.opacity -= 0.02;
+    this.opacity -= isMobile ? 0.025 : 0.02;
     this.size *= 0.98;
   }
   draw() {
@@ -139,7 +140,8 @@ class TextParticle {
 }
 
 function init() {
-  for (let i = 0; i < 40; i++) {
+  const heartCount = isMobile ? 20 : 40; // Giảm số trái tim trên di động
+  for (let i = 0; i < heartCount; i++) {
     hearts.push(new Heart());
   }
 }
@@ -168,20 +170,20 @@ function createTextExplosion(x, y) {
   text.style.top = `${y}px`;
   document.body.appendChild(text);
 
-  // Thêm particles nhỏ quanh chữ
   const colorHsl = { h: Math.random() * 100 + 200, s: 85, l: 65 };
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < (isMobile ? 10 : 20); i++) {
     particles.push(new TextParticle(x, y, colorHsl));
   }
 
   gsap.fromTo(text, 
     { scale: 0.5, opacity: 1, rotation: Math.random() * 90 - 45 },
-    { scale: 3, opacity: 0, duration: 2, ease: "power4.out", onComplete: () => text.remove() }
+    { scale: isMobile ? 3.5 : 3, opacity: 0, duration: isMobile ? 2.2 : 2, ease: "power4.out", onComplete: () => text.remove() }
   );
 }
 
 function createExplosion(x, y, colorHsl) {
-  for (let i = 0; i < 50; i++) {
+  const particleCount = isMobile ? 30 : 50;
+  for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle(x, y, colorHsl));
   }
 }
@@ -192,18 +194,38 @@ canvas.addEventListener("mousemove", (e) => {
   mouse.y = e.clientY - rect.top;
 });
 
-canvas.addEventListener("click", (e) => {
+canvas.addEventListener("touchstart", (e) => {
+  e.preventDefault(); // Ngăn scroll trên di động
   const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
+  const touch = e.touches[0];
+  mouse.x = touch.clientX - rect.left;
+  mouse.y = touch.clientY - rect.top;
 
   hearts.forEach((heart, index) => {
-    const dx = mouseX - heart.x;
-    const dy = mouseY - heart.y;
+    const dx = mouse.x - heart.x;
+    const dy = mouse.y - heart.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < heart.size) {
+    if (distance < heart.size + 30) {
       createExplosion(heart.x, heart.y, heart.colorHsl);
-      createTextExplosion(mouseX, mouseY);
+      createTextExplosion(mouse.x, mouse.y);
+      hearts.splice(index, 1);
+      hearts.push(new Heart());
+    }
+  });
+});
+
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = e.clientX - rect.left;
+  mouse.y = e.clientY - rect.top;
+
+  hearts.forEach((heart, index) => {
+    const dx = mouse.x - heart.x;
+    const dy = mouse.y - heart.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < heart.size + 20) {
+      createExplosion(heart.x, heart.y, heart.colorHsl);
+      createTextExplosion(mouse.x, mouse.y);
       hearts.splice(index, 1);
       hearts.push(new Heart());
     }
