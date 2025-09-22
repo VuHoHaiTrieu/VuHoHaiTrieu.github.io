@@ -5,16 +5,16 @@ canvas.height = window.innerHeight;
 
 const hearts = [];
 const particles = [];
-let mouse = { x: 0, y: 0 };
+let mouse = { x: null, y: null };
 
 class Heart {
   constructor() {
     this.x = Math.random() * canvas.width;
     this.y = canvas.height + 50;
-    this.size = Math.random() * 35 + 25;
+    this.size = Math.random() * 40 + 30;
     this.baseSize = this.size;
-    this.speedY = -(Math.random() * 4 + 3);
-    this.colorHsl = { h: Math.random() * 120 + 200, s: 80, l: 60 }; // Lưu dưới dạng object để dễ chuyển rgb
+    this.speedY = -(Math.random() * 3 + 2);
+    this.colorHsl = { h: Math.random() * 100 + 200, s: 85, l: 65 }; // Màu sáng hơn
     this.angle = Math.random() * 0.03;
     this.glow = 0;
     this.rotation = 0;
@@ -22,9 +22,9 @@ class Heart {
   }
   update() {
     this.y += this.speedY;
-    this.x += Math.sin(this.angle += 0.03) * 3;
+    this.x += Math.sin(this.angle += 0.025) * 2.5;
     this.rotation += 0.01;
-    this.glow = Math.sin(Date.now() * 0.003) * 15 + 15;
+    this.glow = Math.sin(Date.now() * 0.004) * 20 + 20;
     if (this.y < -this.size * 2) {
       this.y = canvas.height + this.size * 2;
       this.x = Math.random() * canvas.width;
@@ -35,8 +35,8 @@ class Heart {
     const dy = mouse.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     if (distance < this.size + 20) {
-      this.size = this.baseSize * 1.2;
-      this.glow += 10;
+      this.size = this.baseSize * 1.3;
+      this.glow += 15;
     } else {
       this.size = this.baseSize;
     }
@@ -48,7 +48,7 @@ class Heart {
 
     // Gradient cho hiệu ứng 3D
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
-    gradient.addColorStop(0, 'rgba(255,255,255,0.8)');
+    gradient.addColorStop(0, 'rgba(255,255,255,0.9)');
     gradient.addColorStop(1, `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`);
 
     ctx.beginPath();
@@ -71,7 +71,7 @@ class Heart {
     // Thêm highlight cho 3D
     ctx.beginPath();
     ctx.arc(-this.size / 4, -this.size / 4, this.size / 4, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
     ctx.fill();
 
     ctx.restore();
@@ -82,9 +82,40 @@ class Particle {
   constructor(x, y, colorHsl) {
     this.x = x;
     this.y = y;
-    this.size = Math.random() * 6 + 3;
-    this.speedX = Math.random() * 8 - 4;
-    this.speedY = Math.random() * 8 - 4;
+    this.size = Math.random() * 7 + 4;
+    this.speedX = Math.random() * 10 - 5;
+    this.speedY = Math.random() * 10 - 5;
+    this.opacity = 1;
+    this.colorHsl = colorHsl;
+    this.glow = Math.random() * 15 + 10;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.opacity -= 0.012; // Fade chậm hơn
+    this.size *= 0.96; // Thu nhỏ mượt
+    this.speedX *= 0.97;
+    this.speedY *= 0.97;
+  }
+  draw() {
+    ctx.save();
+    ctx.shadowBlur = this.glow;
+    ctx.shadowColor = `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%, ${this.opacity})`;
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+class TextParticle {
+  constructor(x, y, colorHsl) {
+    this.x = x;
+    this.y = y;
+    this.size = Math.random() * 3 + 2;
+    this.speedX = Math.random() * 6 - 3;
+    this.speedY = Math.random() * 6 - 3;
     this.opacity = 1;
     this.colorHsl = colorHsl;
     this.glow = Math.random() * 10 + 5;
@@ -92,10 +123,8 @@ class Particle {
   update() {
     this.x += this.speedX;
     this.y += this.speedY;
-    this.opacity -= 0.015; // Chậm fade hơn để đẹp
-    this.size *= 0.97; // Thu nhỏ mượt hơn
-    this.speedX *= 0.98; // Chậm dần để tự nhiên
-    this.speedY *= 0.98;
+    this.opacity -= 0.02;
+    this.size *= 0.98;
   }
   draw() {
     ctx.save();
@@ -139,14 +168,20 @@ function createTextExplosion(x, y) {
   text.style.top = `${y}px`;
   document.body.appendChild(text);
 
+  // Thêm particles nhỏ quanh chữ
+  const colorHsl = { h: Math.random() * 100 + 200, s: 85, l: 65 };
+  for (let i = 0; i < 20; i++) {
+    particles.push(new TextParticle(x, y, colorHsl));
+  }
+
   gsap.fromTo(text, 
-    { scale: 0.5, opacity: 1, rotation: Math.random() * 180 - 90 },
-    { scale: 2.5, opacity: 0, duration: 1.8, ease: "power3.out", onComplete: () => text.remove() }
+    { scale: 0.5, opacity: 1, rotation: Math.random() * 90 - 45 },
+    { scale: 3, opacity: 0, duration: 2, ease: "power4.out", onComplete: () => text.remove() }
   );
 }
 
 function createExplosion(x, y, colorHsl) {
-  for (let i = 0; i < 40; i++) { // Tăng số particles cho đẹp hơn
+  for (let i = 0; i < 50; i++) {
     particles.push(new Particle(x, y, colorHsl));
   }
 }
