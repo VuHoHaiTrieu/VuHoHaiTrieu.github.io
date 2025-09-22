@@ -3,9 +3,9 @@ body {
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
   height: 100vh;
-  background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #8e2de2, #00c6ff, #ff69b4);
-  background-size: 600% 600%;
-  animation: cosmicGradient 20s ease infinite;
+  background: linear-gradient(-60deg, #0a0826, #2a1b5c, #1e1a4a, #9b38e6, #00d4ff, #ff4da6);
+  background-size: 800% 800%;
+  animation: cosmicGradient 18s ease-in-out infinite;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,8 +19,8 @@ body {
   100% { background-position: 0% 50%; }
 }
 
-/* Hiệu ứng ngôi sao lấp lánh và nebula */
-.stars, .twinkling, .nebula, .clouds {
+/* Hiệu ứng nền chuyên nghiệp */
+.stars, .twinkling, .nebula, .clouds, .ambient-glow {
   position: absolute;
   top: 0;
   left: 0;
@@ -31,55 +31,69 @@ body {
 
 .stars {
   background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><circle cx="1" cy="1" r="1" fill="white"/></svg>') repeat;
-  animation: twinkle 25s linear infinite;
-  opacity: 0.8;
+  animation: twinkle 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  opacity: 0.9;
 }
 
 .twinkling {
-  background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><circle cx="2" cy="2" r="2" fill="rgba(255,255,255,0.6)"/></svg>') repeat;
-  animation: twinkle 18s linear infinite reverse;
-  opacity: 0.7;
+  background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><circle cx="2" cy="2" r="2" fill="rgba(255,255,255,0.7)"/></svg>') repeat;
+  animation: twinkle 15s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
+  opacity: 0.8;
 }
 
 .nebula {
-  background: radial-gradient(ellipse at center, rgba(142,45,226,0.3) 0%, rgba(0,198,255,0.2) 50%, transparent 100%);
-  animation: pulse 10s ease-in-out infinite;
+  background: radial-gradient(ellipse at center, rgba(155,56,230,0.35) 0%, rgba(0,212,255,0.25) 50%, transparent 100%);
+  animation: pulse 12s ease-in-out infinite;
 }
 
 .clouds {
-  background: radial-gradient(ellipse at center, rgba(255,255,255,0.15) 0%, transparent 70%);
-  animation: float 40s linear infinite;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.2) 0%, transparent 65%);
+  animation: float 35s cubic-bezier(0.36, 0, 0.64, 1) infinite;
+}
+
+.ambient-glow {
+  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: ambientPulse 15s ease-in-out infinite;
 }
 
 @keyframes twinkle {
-  0% { opacity: 0.4; transform: translate(0, 0) scale(1); }
-  50% { opacity: 1; transform: translate(20px, 20px) scale(1.05); }
-  100% { opacity: 0.4; transform: translate(0, 0) scale(1); }
+  0% { opacity: 0.5; transform: translate(0, 0) scale(1); }
+  50% { opacity: 1; transform: translate(25px, 25px) scale(1.1); }
+  100% { opacity: 0.5; transform: translate(0, 0) scale(1); }
 }
 
 @keyframes pulse {
   0% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.1); }
+  50% { opacity: 0.9; transform: scale(1.15); }
   100% { opacity: 0.5; transform: scale(1); }
 }
 
 @keyframes float {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-1500px); }
+  0% { transform: translateX(0) scale(1); }
+  50% { transform: translateX(-600px) scale(1.05); }
+  100% { transform: translateX(-1200px) scale(1); }
 }
 
-/* Tiêu đề lung linh */
+@keyframes ambientPulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
+/* Tiêu đề sang trọng */
 #title {
-  font-size: 3.5em;
+  font-family: 'Playfair Display', serif;
+  font-size: 4em;
   color: #fff;
-  text-shadow: 0 0 15px #fff, 0 0 25px #00c6ff, 0 0 35px #8e2de2, 0 0 45px #ff69b4;
-  animation: glow 3s ease-in-out infinite alternate;
+  text-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #00d4ff, 0 0 50px #9b38e6;
+  animation: glow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
   z-index: 10;
+  letter-spacing: 2px;
 }
 
 @keyframes glow {
-  from { text-shadow: 0 0 10px #fff, 0 0 20px #8e2de2, 0 0 30px #00c6ff, 0 0 40px #ff69b4; }
-  to { text-shadow: 0 0 20px #fff, 0 0 30px #00c6ff, 0 0 40px #8e2de2, 0 0 50px #ff69b4; }
+  from { text-shadow: 0 0 15px #fff, 0 0 25px #ff4da6, 0 0 35px #00d4ff, 0 0 45px #9b38e6; }
+  to { text-shadow: 0 0 25px #fff, 0 0 35px #00d4ff, 0 0 45px #9b38e6, 0 0 55px #ff4da6; }
 }
 
 /* Canvas cho trái tim */
@@ -92,14 +106,16 @@ body {
   z-index: 5;
 }
 
-/* Hiệu ứng chữ "Thơm" hoặc "Thúi" */
+/* Hiệu ứng chữ nổ nổi bật */
 .text-explosion {
   position: absolute;
-  font-size: 3em;
-  font-weight: bold;
-  color: #ff69b4;
-  text-shadow: 0 0 20px #ff69b4, 0 0 30px #8e2de2, 0 0 40px #00c6ff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 3.5em;
+  font-weight: 900;
+  color: #ff4da6; /* Hồng neon */
+  -webkit-text-stroke: 1px #fff; /* Stroke trắng để nổi */
+  text-shadow: 0 0 25px #ff4da6, 0 0 35px #00d4ff, 0 0 45px #9b38e6;
   pointer-events: none;
   z-index: 10;
-  opacity: 1; /* Đảm bảo rõ nét ban đầu */
+  opacity: 1;
 }
