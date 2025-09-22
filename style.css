@@ -1,61 +1,111 @@
-/* Nền gradient động */
 body {
   margin: 0;
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
   height: 100vh;
-  background: linear-gradient(-45deg, #6a11cb, #2575fc, #6a11cb, #2575fc);
+  background: linear-gradient(-45deg, #1e1e2f, #4a00e0, #8e2de2, #00c6ff);
   background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
+  animation: gradientBG 10s ease infinite;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  position: relative;
 }
 
 @keyframes gradientBG {
-  0% {background-position: 0% 50%;}
-  50% {background-position: 100% 50%;}
-  100% {background-position: 0% 50%;}
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* Tiêu đề lung linh */
-#title {
-  font-size: 3em;
-  color: white;
-  text-shadow: 0 0 10px #fff, 0 0 20px #6a11cb, 0 0 30px #2575fc;
-  animation: glow 2s infinite alternate;
-}
-
-@keyframes glow {
-  from { text-shadow: 0 0 10px #6a11cb, 0 0 20px #2575fc; }
-  to { text-shadow: 0 0 20px #2575fc, 0 0 30px #6a11cb; }
-}
-
-/* Nút pháo hoa */
-#btn {
-  margin-top: 20px;
-  padding: 15px 30px;
-  font-size: 18px;
-  border: none;
-  border-radius: 30px;
-  background: linear-gradient(45deg, #6a11cb, #2575fc);
-  color: white;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-#btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255,255,255,0.8);
-}
-
-/* Canvas pháo hoa full màn hình */
-#fireworks {
+/* Hiệu ứng ngôi sao lấp lánh */
+.stars, .twinkling, .clouds, .butterflies, .flowers {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.stars {
+  background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><circle cx="1" cy="1" r="1" fill="white"/></svg>') repeat;
+  animation: twinkle 20s linear infinite;
+}
+
+.twinkling {
+  background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><circle cx="2" cy="2" r="2" fill="rgba(255,255,255,0.5)"/></svg>') repeat;
+  animation: twinkle 15s linear infinite reverse;
+}
+
+.clouds {
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+  animation: float 30s linear infinite;
+}
+
+.butterflies {
+  background: transparent;
+}
+
+.flowers {
+  background: transparent;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.5; transform: translate(0, 0); }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; transform: translate(50px, 50px); }
+}
+
+@keyframes float {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-1000px); }
+}
+
+/* Tiêu đề lung linh */
+#title {
+  font-size: 3.5em;
+  color: #fff;
+  text-shadow: 0 0 10px #fff, 0 0 20px #8e2de2, 0 0 30px #00c6ff;
+  animation: glow 2s ease-in-out infinite alternate;
+  z-index: 10;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px #fff, 0 0 20px #8e2de2, 0 0 30px #00c6ff; }
+  to { text-shadow: 0 0 20px #fff, 0 0 30px #00c6ff, 0 0 40px #8e2de2; }
+}
+
+/* Nút tương tác */
+#btn {
+  margin-top: 20px;
+  padding: 15px 40px;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(45deg, #8e2de2, #00c6ff);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  z-index: 10;
+}
+
+#btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(255,255,255,0.9);
+}
+
+#btn:active {
+  transform: scale(1);
+}
+
+/* Canvas cho hiệu ứng sóng ánh sáng */
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
 }
