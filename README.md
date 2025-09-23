@@ -1,4 +1,4 @@
-# 🌸 Website dễ thương của Triều
+# 🌸 Website của Triều
 
 Repo này chứa source code cho [GitHub Pages](https://vuhohaitrieu.github.io).
 
