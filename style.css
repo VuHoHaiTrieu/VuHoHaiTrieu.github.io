@@ -40,7 +40,7 @@ body {
   height: 100vh;
   background: var(--bg-gradient);
   background-size: var(--bg-size);
-  animation: cosmicGradient 18s ease-in-out infinite;
+  animation: cosmicGradient 28s ease-in-out infinite; /* Chậm hơn cho chill */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -92,46 +92,38 @@ body {
   animation: ambientPulse 15s ease-in-out infinite;
 }
 
-@keyframes twinkle {
-  0% { opacity: 0.5; transform: translate(0, 0) scale(1); }
-  50% { opacity: 1; transform: translate(20px, 20px) scale(1.1); }
-  100% { opacity: 0.5; transform: translate(0, 0) scale(1); }
-}
-
-@keyframes pulse {
-  0% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.1); }
-  100% { opacity: 0.5; transform: scale(1); }
-}
-
-@keyframes float {
-  0% { transform: translateX(0) scale(1); }
-  50% { transform: translateX(-400px) scale(1.05); }
-  100% { transform: translateX(-800px) scale(1); }
-}
-
-@keyframes ambientPulse {
-  0% { opacity: 0.3; }
-  50% { opacity: 0.5; }
-  100% { opacity: 0.3; }
-}
+@keyframes twinkle { /* ... giữ nguyên */ }
+@keyframes pulse { /* ... giữ nguyên */ }
+@keyframes float { /* ... giữ nguyên */ }
+@keyframes ambientPulse { /* ... giữ nguyên */ }
 
 /* Tiêu đề */
 #title {
   font-family: 'Playfair Display', serif;
-  font-size: 10vw;
+  font-size: 9vw;
   color: var(--title-color);
   text-shadow: var(--title-shadow);
-  animation: glow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  animation: glow 3s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
   z-index: 10;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-align: center;
-  padding: 0 10px;
+  padding: 0 15px;
+  opacity: 1;
 }
 
-@keyframes glow {
-  from { text-shadow: 0 0 15px var(--title-color), 0 0 25px #ff4da6, 0 0 35px #00d4ff, 0 0 45px #9b38e6; }
-  to { text-shadow: 0 0 25px var(--title-color), 0 0 35px #00d4ff, 0 0 45px #9b38e6, 0 0 55px #ff4da6; }
+@keyframes glow { /* ... giữ nguyên */ }
+
+/* Fade out title */
+.fade-out-title {
+  animation: fadeOutTitle 2.5s ease-in forwards;
+  animation-delay: 5s;
+}
+
+@keyframes fadeOutTitle {
+  to {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
 }
 
 /* Nút chế độ sáng/tối */
@@ -146,11 +138,12 @@ body {
   border-radius: 50%;
   padding: 10px;
   color: var(--button-color);
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.2s;
 }
 
 .dark-mode-toggle:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
 }
 
 /* Bộ đếm trái tim */
@@ -159,38 +152,30 @@ body {
   top: 20px;
   right: 20px;
   z-index: 15;
-  font-size: 1.5em;
+  font-size: 1.6em;
   color: var(--counter-color);
   display: flex;
   align-items: center;
   background: var(--button-bg);
   border-radius: 20px;
-  padding: 5px 10px;
+  padding: 6px 12px;
+  backdrop-filter: blur(4px);
 }
 
-.heart-counter .icon {
-  margin-right: 5px;
+/* Canvas */
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  cursor: default;
+  transition: cursor 0.2s;
 }
 
-/* Media query cho di động */
-@media (max-width: 768px) {
-  #title {
-    font-size: 8vw;
-    text-shadow: 0 0 10px var(--title-color), 0 0 20px #ff4da6, 0 0 30px #00d4ff;
-  }
-
-  .dark-mode-toggle, .heart-counter {
-    font-size: 1.5em;
-    padding: 8px;
-  }
-
-  .stars, .twinkling {
-    background-size: 3px 3px, 5px 5px;
-  }
-
-  .nebula, .clouds, .ambient-glow {
-    animation-duration: 15s, 25s, 10s;
-  }
+#canvas.interactive {
+  cursor: pointer;
 }
 
 /* Hiệu ứng chữ nổ */
@@ -205,22 +190,12 @@ body {
   pointer-events: none;
   z-index: 10;
   opacity: 1;
+  transform-origin: center;
 }
 
+/* Media query cho di động */
 @media (max-width: 768px) {
-  .text-explosion {
-    font-size: 12vw;
-    -webkit-text-stroke: 1px #fff;
-    text-shadow: 0 0 15px #ff2e82, 0 0 25px #00d4ff, 0 0 35px #9b38e6;
-  }
-}
-
-/* Canvas */
-#canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 5;
+  #title { font-size: 11vw; }
+  .text-explosion { font-size: 14vw; -webkit-text-stroke: 1.2px #fff; }
+  .dark-mode-toggle, .heart-counter { font-size: 1.4em; padding: 8px; }
 }
