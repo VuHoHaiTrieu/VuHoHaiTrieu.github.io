@@ -1,5 +1,5 @@
 :root {
-  --bg-gradient: linear-gradient(135deg, #ffebee, #ffc1e3, #ff9ce4, #ff77d9, #ff4da6, #ff4081); /* Romantic pink gradient */
+  --bg-gradient: linear-gradient(135deg, #ffebee, #ffc1e3, #ff9ce4, #ff77d9, #ff4da6, #ff4081);
   --bg-size: 400% 400%;
   --petal-opacity: 0.6;
   --glow-opacity: 0.2;
@@ -49,7 +49,6 @@ body {
   100% { background-position: 0% 0%; }
 }
 
-/* Layer hoa rơi (petals) */
 .petals {
   position: absolute;
   top: 0;
@@ -63,29 +62,26 @@ body {
 }
 
 @keyframes fallPetals {
-  0% { transform: translateY(0) rotate(0deg); }
-  100% { transform: translateY(100vh) rotate(360deg); }
+  0% { transform: translateY(-100%) rotate(0deg); }
+  100% { transform: translateY(100vh) rotate(720deg); }
 }
 
-/* Glow overlay soft */
 .glow-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(255,182,193,var(--glow-opacity)) 0%, transparent 80%);
+  background: radial-gradient(circle at center, rgba(255,182,193,var(--glow-opacity)) 0%, transparent 70%);
   animation: pulseGlow 8s ease-in-out infinite;
   pointer-events: none;
 }
 
 @keyframes pulseGlow {
-  0% { opacity: 0.3; }
+  0%, 100% { opacity: 0.3; }
   50% { opacity: 0.6; }
-  100% { opacity: 0.3; }
 }
 
-/* Title romantic font */
 #title {
   font-family: 'Great Vibes', cursive;
   font-size: 9vw;
@@ -102,7 +98,6 @@ body {
   to { text-shadow: 0 0 20px var(--title-color), 0 0 30px #ff77d9; }
 }
 
-/* Dark mode toggle */
 .dark-mode-toggle {
   position: absolute;
   top: 20px;
@@ -121,7 +116,6 @@ body {
   background: rgba(255, 182, 193, 0.3);
 }
 
-/* Counter */
 .heart-counter {
   position: absolute;
   top: 20px;
@@ -136,7 +130,6 @@ body {
   padding: 5px 10px;
 }
 
-/* Canvas */
 #canvas {
   position: absolute;
   top: 0;
@@ -151,7 +144,6 @@ body {
   cursor: pointer;
 }
 
-/* Text explosion */
 .text-explosion {
   position: absolute;
   font-family: 'Great Vibes', cursive;
@@ -164,19 +156,9 @@ body {
   opacity: 1;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-  #title {
-    font-size: 12vw;
-  }
-  .text-explosion {
-    font-size: 14vw;
-  }
-  .dark-mode-toggle, .heart-counter {
-    font-size: 1.5em;
-    padding: 8px;
-  }
-  .petals {
-    background-size: 15px 15px;
-  }
+  #title { font-size: 12vw; }
+  .text-explosion { font-size: 14vw; }
+  .dark-mode-toggle, .heart-counter { font-size: 1.5em; padding: 8px; }
+  .petals { background-size: 15px 15px; }
 }
