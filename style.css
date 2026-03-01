@@ -1,34 +1,28 @@
 :root {
-  --bg-gradient: linear-gradient(-60deg, #1a0933, #3e1f6e, #2c1b5c, #7a2cb8, #00b8e6, #ff4da6); /* Pastel cosmic */
-  --bg-size: 500% 500%;
-  --star-opacity: 0.85;
-  --twinkle-opacity: 0.75;
-  --nebula-opacity: 0.35;
-  --cloud-opacity: 0.2;
-  --ambient-opacity: 0.15;
-  --title-color: #fff;
-  --title-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #00d4ff, 0 0 50px #9b38e6;
-  --text-explosion-color: #ff4da6;
-  --text-explosion-stroke: 1.5px #fff;
-  --text-explosion-shadow: 0 0 25px #ff4da6, 0 0 35px #00d4ff, 0 0 45px #9b38e6;
-  --button-bg: rgba(255, 255, 255, 0.15);
+  --bg-gradient: linear-gradient(135deg, #ffebee, #ffc1e3, #ff9ce4, #ff77d9, #ff4da6, #ff4081); /* Romantic pink gradient */
+  --bg-size: 400% 400%;
+  --petal-opacity: 0.6;
+  --glow-opacity: 0.2;
+  --title-color: #ff4081;
+  --title-shadow: 0 0 15px #ff4081, 0 0 25px #ffc1e3, 0 0 35px #ff77d9;
+  --text-explosion-color: #ff4081;
+  --text-explosion-stroke: 1.2px #fff;
+  --text-explosion-shadow: 0 0 20px #ff4081, 0 0 30px #ff77d9, 0 0 40px #ffc1e3;
+  --button-bg: rgba(255, 255, 255, 0.2);
   --button-color: #fff;
   --counter-color: #fff;
 }
 
 body.dark-mode {
-  --bg-gradient: linear-gradient(-60deg, #000, #111, #222, #333, #444, #555);
-  --star-opacity: 0.6;
-  --twinkle-opacity: 0.5;
-  --nebula-opacity: 0.25;
-  --cloud-opacity: 0.15;
-  --ambient-opacity: 0.1;
-  --title-color: #eee;
-  --title-shadow: 0 0 15px #eee, 0 0 20px #444, 0 0 25px #555, 0 0 30px #666;
-  --text-explosion-color: #bbb;
+  --bg-gradient: linear-gradient(135deg, #1a000d, #33001a, #4d0026, #660033, #800040, #99004d);
+  --petal-opacity: 0.4;
+  --glow-opacity: 0.1;
+  --title-color: #ff69b4;
+  --title-shadow: 0 0 10px #ff69b4, 0 0 15px #99004d, 0 0 20px #660033;
+  --text-explosion-color: #ff69b4;
   --text-explosion-stroke: 1px #ddd;
-  --text-explosion-shadow: 0 0 20px #bbb, 0 0 25px #666, 0 0 30px #777;
-  --button-bg: rgba(0, 0, 0, 0.6);
+  --text-explosion-shadow: 0 0 15px #ff69b4, 0 0 20px #660033, 0 0 25px #99004d;
+  --button-bg: rgba(0, 0, 0, 0.4);
   --button-color: #ddd;
   --counter-color: #ddd;
 }
@@ -40,99 +34,107 @@ body {
   height: 100vh;
   background: var(--bg-gradient);
   background-size: var(--bg-size);
-  animation: cosmicGradient 30s ease-in-out infinite; /* Chậm mượt hơn */
+  animation: romanticGradient 20s ease-in-out infinite;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   position: relative;
   touch-action: manipulation;
-  transition: all 0.5s ease;
 }
 
-@keyframes cosmicGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@keyframes romanticGradient {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
 }
 
-/* Layers với parallax (GSAP sẽ handle) */
-.stars, .twinkling, .nebula, .clouds, .ambient-glow {
+/* Layer hoa rơi (petals) */
+.petals {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 5C5 0 0 10 10 15C20 10 15 0 10 5" fill="rgba(255,182,193,0.5)"/></svg>') repeat;
+  animation: fallPetals 30s linear infinite;
+  opacity: var(--petal-opacity);
   pointer-events: none;
-  transition: opacity 0.5s ease;
 }
 
-.stars { opacity: var(--star-opacity); }
-.twinkling { opacity: var(--twinkle-opacity); }
-.nebula { opacity: var(--nebula-opacity); }
-.clouds { opacity: var(--cloud-opacity); }
-.ambient-glow { opacity: var(--ambient-opacity); }
+@keyframes fallPetals {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(100vh) rotate(360deg); }
+}
 
-/* Title */
+/* Glow overlay soft */
+.glow-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(255,182,193,var(--glow-opacity)) 0%, transparent 80%);
+  animation: pulseGlow 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulseGlow {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
+/* Title romantic font */
 #title {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(4vw, 8vw, 60px); /* Responsive font */
+  font-family: 'Great Vibes', cursive;
+  font-size: 9vw;
   color: var(--title-color);
   text-shadow: var(--title-shadow);
-  animation: glow 2.5s ease-in-out infinite alternate;
+  animation: romanticGlow 2s ease-in-out infinite alternate;
   z-index: 10;
-  letter-spacing: 1.5px;
   text-align: center;
-  padding: 0 clamp(10px, 5vw, 20px);
+  padding: 0 10px;
 }
 
-@keyframes glow {
-  from { text-shadow: 0 0 15px var(--title-color), 0 0 25px #ff4da6; }
-  to { text-shadow: 0 0 25px var(--title-color), 0 0 35px #00d4ff; }
+@keyframes romanticGlow {
+  from { text-shadow: 0 0 10px var(--title-color), 0 0 20px #ffc1e3; }
+  to { text-shadow: 0 0 20px var(--title-color), 0 0 30px #ff77d9; }
 }
 
-/* Buttons pro (rounded, hover effect) */
-.dark-mode-toggle, .share-button, .fullscreen-toggle {
+/* Dark mode toggle */
+.dark-mode-toggle {
   position: absolute;
+  top: 20px;
+  left: 20px;
   z-index: 15;
   cursor: pointer;
-  font-size: 1.8em;
+  font-size: 2em;
   background: var(--button-bg);
   border-radius: 50%;
-  padding: 12px;
+  padding: 10px;
   color: var(--button-color);
-  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  transition: background 0.3s;
 }
 
-.dark-mode-toggle { top: 20px; left: 20px; }
-.share-button { bottom: 20px; left: 20px; }
-.fullscreen-toggle { bottom: 20px; right: 20px; }
-
-.dark-mode-toggle:hover, .share-button:hover, .fullscreen-toggle:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255,255,255,0.3);
+.dark-mode-toggle:hover {
+  background: rgba(255, 182, 193, 0.3);
 }
 
-/* Counter pro */
+/* Counter */
 .heart-counter {
   position: absolute;
   top: 20px;
   right: 20px;
   z-index: 15;
-  font-size: 1.4em;
+  font-size: 1.5em;
   color: var(--counter-color);
   display: flex;
   align-items: center;
   background: var(--button-bg);
-  border-radius: 25px;
-  padding: 8px 15px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  transition: transform 0.3s;
+  border-radius: 20px;
+  padding: 5px 10px;
 }
-
-.heart-counter:hover { transform: scale(1.05); }
 
 /* Canvas */
 #canvas {
@@ -145,14 +147,15 @@ body {
   cursor: default;
 }
 
-#canvas.interactive { cursor: pointer; }
+#canvas.interactive {
+  cursor: pointer;
+}
 
-/* Text explosion mượt hơn */
+/* Text explosion */
 .text-explosion {
   position: absolute;
-  font-family: 'Poppins', sans-serif;
-  font-size: clamp(8vw, 10vw, 80px);
-  font-weight: 900;
+  font-family: 'Great Vibes', cursive;
+  font-size: 10vw;
   color: var(--text-explosion-color);
   -webkit-text-stroke: var(--text-explosion-stroke);
   text-shadow: var(--text-explosion-shadow);
@@ -161,21 +164,19 @@ body {
   opacity: 1;
 }
 
-/* Responsive media queries nâng cao */
+/* Responsive */
 @media (max-width: 768px) {
-  #title { font-size: 8vw; letter-spacing: 1px; }
-  .text-explosion { font-size: 12vw; }
-  .dark-mode-toggle, .share-button, .fullscreen-toggle { font-size: 1.5em; padding: 10px; }
-  .heart-counter { font-size: 1.2em; padding: 6px 12px; }
-  body { touch-action: pan-x pan-y; } /* Cải thiện touch mobile */
-}
-
-@media (orientation: landscape) {
-  #title { font-size: 6vw; }
-}
-
-/* Fullscreen style */
-body.fullscreen {
-  width: 100vw;
-  height: 100vh;
+  #title {
+    font-size: 12vw;
+  }
+  .text-explosion {
+    font-size: 14vw;
+  }
+  .dark-mode-toggle, .heart-counter {
+    font-size: 1.5em;
+    padding: 8px;
+  }
+  .petals {
+    background-size: 15px 15px;
+  }
 }
