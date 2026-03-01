@@ -1,257 +1,201 @@
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+:root {
+  --bg-gradient: linear-gradient(-60deg, #0a0826, #2a1b5c, #1e1a4a, #9b38e6, #00d4ff, #ff4da6);
+  --bg-size: 600% 600%;
+  --star-opacity: 0.8;
+  --twinkle-opacity: 0.7;
+  --nebula-opacity: 0.3;
+  --cloud-opacity: 0.15;
+  --ambient-opacity: 0.1;
+  --title-color: #fff;
+  --title-shadow: 0 0 15px #fff, 0 0 25px #ff4da6, 0 0 35px #00d4ff, 0 0 45px #9b38e6;
+  --text-explosion-color: #ff2e82;
+  --text-explosion-stroke: 1.5px #fff;
+  --text-explosion-shadow: 0 0 20px #ff2e82, 0 0 30px #00d4ff, 0 0 40px #9b38e6;
+  --button-bg: rgba(255, 255, 255, 0.1);
+  --button-color: #fff;
+  --counter-color: #fff;
+}
 
-const hearts = [];
-const particles = [];
-let mouse = { x: null, y: null };
-const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-let heartCount = 0;
-const countElement = document.getElementById("count");
-const darkModeToggle = document.getElementById("dark-mode-toggle");
-const toggleIcon = darkModeToggle.querySelector(".icon");
+body.dark-mode {
+  --bg-gradient: linear-gradient(-60deg, #000000, #1a1a1a, #2a2a2a, #3a3a3a, #4a4a4a, #5a5a5a);
+  --star-opacity: 0.5;
+  --twinkle-opacity: 0.4;
+  --nebula-opacity: 0.2;
+  --cloud-opacity: 0.1;
+  --ambient-opacity: 0.05;
+  --title-color: #ddd;
+  --title-shadow: 0 0 10px #ddd, 0 0 15px #333, 0 0 20px #444, 0 0 25px #555;
+  --text-explosion-color: #aaa;
+  --text-explosion-stroke: 1px #ccc;
+  --text-explosion-shadow: 0 0 15px #aaa, 0 0 20px #555, 0 0 25px #666;
+  --button-bg: rgba(0, 0, 0, 0.5);
+  --button-color: #ccc;
+  --counter-color: #ccc;
+}
 
-class Heart {
-  constructor() {
-    this.x = Math.random() * canvas.width;
-    this.y = canvas.height + 50;
-    this.size = Math.random() * (isMobile ? 30 : 40) + (isMobile ? 20 : 25);
-    this.baseSize = this.size;
-    this.speedY = -(Math.random() * 2 + 1.5);
-    this.colorHsl = { h: Math.random() * 100 + 200, s: 85, l: document.body.classList.contains("dark-mode") ? 40 : 65 }; // Tối hơn ở dark mode
-    this.angle = Math.random() * 0.03;
-    this.glow = 0;
-    this.rotation = 0;
-    this.hover = false;
-  }
-  update() {
-    this.y += this.speedY;
-    this.x += Math.sin(this.angle += 0.025) * 2;
-    this.rotation += 0.01;
-    this.glow = Math.sin(Date.now() * 0.004) * (isMobile ? 15 : 20) + (isMobile ? 15 : 20);
-    if (this.y < -this.size * 2) {
-      this.y = canvas.height + this.size * 2;
-      this.x = Math.random() * canvas.width;
-    }
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  background: var(--bg-gradient);
+  background-size: var(--bg-size);
+  animation: cosmicGradient 28s ease-in-out infinite; /* Chậm hơn cho chill */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  touch-action: manipulation;
+}
 
-    const dx = mouse.x - this.x;
-    const dy = mouse.y - this.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < this.size + (isMobile ? 30 : 20)) {
-      this.size = this.baseSize * (isMobile ? 1.4 : 1.3);
-      this.glow += isMobile ? 10 : 15;
-    } else {
-      this.size = this.baseSize;
-    }
-  }
-  draw() {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.rotation);
+@keyframes cosmicGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
-    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
-    gradient.addColorStop(0, 'rgba(255,255,255,0.9)');
-    gradient.addColorStop(1, `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`);
+/* Hiệu ứng nền */
+.stars, .twinkling, .nebula, .clouds, .ambient-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 
-    ctx.beginPath();
-    ctx.moveTo(0, -this.size / 2);
-    ctx.bezierCurveTo(
-      -this.size, -this.size * 0.8,
-      -this.size * 1.2, this.size / 3,
-      0, this.size * 0.9
-    );
-    ctx.bezierCurveTo(
-      this.size * 1.2, this.size / 3,
-      this.size, -this.size * 0.8,
-      0, -this.size / 2
-    );
-    ctx.fillStyle = gradient;
-    ctx.shadowBlur = this.glow;
-    ctx.shadowColor = `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`;
-    ctx.fill();
+.stars {
+  background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><circle cx="1" cy="1" r="1" fill="white"/></svg>') repeat;
+  animation: twinkle 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  opacity: var(--star-opacity);
+}
 
-    ctx.beginPath();
-    ctx.arc(-this.size / 4, -this.size / 4, this.size / 4, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.fill();
+.twinkling {
+  background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><circle cx="2" cy="2" r="2" fill="rgba(255,255,255,0.7)"/></svg>') repeat;
+  animation: twinkle 15s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
+  opacity: var(--twinkle-opacity);
+}
 
-    ctx.restore();
+.nebula {
+  background: radial-gradient(ellipse at center, rgba(155,56,230,var(--nebula-opacity)) 0%, rgba(0,212,255,var(--nebula-opacity)) 50%, transparent 100%);
+  animation: pulse 12s ease-in-out infinite;
+}
+
+.clouds {
+  background: radial-gradient(ellipse at center, rgba(255,255,255,var(--cloud-opacity)) 0%, transparent 65%);
+  animation: float 35s cubic-bezier(0.36, 0, 0.64, 1) infinite;
+}
+
+.ambient-glow {
+  background: radial-gradient(circle at center, rgba(255,255,255,var(--ambient-opacity)) 0%, transparent 70%);
+  animation: ambientPulse 15s ease-in-out infinite;
+}
+
+@keyframes twinkle { /* ... giữ nguyên */ }
+@keyframes pulse { /* ... giữ nguyên */ }
+@keyframes float { /* ... giữ nguyên */ }
+@keyframes ambientPulse { /* ... giữ nguyên */ }
+
+/* Tiêu đề */
+#title {
+  font-family: 'Playfair Display', serif;
+  font-size: 9vw;
+  color: var(--title-color);
+  text-shadow: var(--title-shadow);
+  animation: glow 3s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  z-index: 10;
+  letter-spacing: 1.5px;
+  text-align: center;
+  padding: 0 15px;
+  opacity: 1;
+}
+
+@keyframes glow { /* ... giữ nguyên */ }
+
+/* Fade out title */
+.fade-out-title {
+  animation: fadeOutTitle 2.5s ease-in forwards;
+  animation-delay: 5s;
+}
+
+@keyframes fadeOutTitle {
+  to {
+    opacity: 0;
+    transform: translateY(-40px);
   }
 }
 
-class Particle {
-  constructor(x, y, colorHsl) {
-    this.x = x;
-    this.y = y;
-    this.size = Math.random() * (isMobile ? 5 : 7) + (isMobile ? 3 : 4);
-    this.speedX = Math.random() * (isMobile ? 8 : 10) - (isMobile ? 4 : 5);
-    this.speedY = Math.random() * (isMobile ? 8 : 10) - (isMobile ? 4 : 5);
-    this.opacity = 1;
-    this.colorHsl = colorHsl;
-    this.glow = Math.random() * (isMobile ? 10 : 15) + (isMobile ? 5 : 10);
-  }
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-    this.opacity -= isMobile ? 0.015 : 0.012;
-    this.size *= isMobile ? 0.97 : 0.96;
-    this.speedX *= 0.97;
-    this.speedY *= 0.97;
-  }
-  draw() {
-    ctx.save();
-    ctx.shadowBlur = this.glow;
-    ctx.shadowColor = `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%, ${this.opacity})`;
-    ctx.fill();
-    ctx.restore();
-  }
+/* Nút chế độ sáng/tối */
+.dark-mode-toggle {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 15;
+  cursor: pointer;
+  font-size: 2em;
+  background: var(--button-bg);
+  border-radius: 50%;
+  padding: 10px;
+  color: var(--button-color);
+  transition: background 0.3s, transform 0.2s;
 }
 
-class TextParticle {
-  constructor(x, y, colorHsl) {
-    this.x = x;
-    this.y = y;
-    this.size = Math.random() * (isMobile ? 2 : 3) + 2;
-    this.speedX = Math.random() * (isMobile ? 4 : 6) - (isMobile ? 2 : 3);
-    this.speedY = Math.random() * (isMobile ? 4 : 6) - (isMobile ? 2 : 3);
-    this.opacity = 1;
-    this.colorHsl = colorHsl;
-    this.glow = Math.random() * (isMobile ? 8 : 10) + 5;
-  }
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-    this.opacity -= isMobile ? 0.025 : 0.02;
-    this.size *= 0.98;
-  }
-  draw() {
-    ctx.save();
-    ctx.shadowBlur = this.glow;
-    ctx.shadowColor = `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%, ${this.opacity})`;
-    ctx.fill();
-    ctx.restore();
-  }
+.dark-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
 }
 
-function init() {
-  const heartCountInit = isMobile ? 20 : 40;
-  for (let i = 0; i < heartCountInit; i++) {
-    hearts.push(new Heart());
-  }
-
-  // Khôi phục chế độ tối từ localStorage
-  if (localStorage.getItem("darkMode") === "enabled") {
-    document.body.classList.add("dark-mode");
-    toggleIcon.textContent = "🌙";
-    hearts.forEach(heart => heart.colorHsl.l = 40);
-  }
+/* Bộ đếm trái tim */
+.heart-counter {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 15;
+  font-size: 1.6em;
+  color: var(--counter-color);
+  display: flex;
+  align-items: center;
+  background: var(--button-bg);
+  border-radius: 20px;
+  padding: 6px 12px;
+  backdrop-filter: blur(4px);
 }
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  hearts.forEach(h => {
-    h.update();
-    h.draw();
-  });
-  particles.forEach((p, index) => {
-    p.update();
-    p.draw();
-    if (p.opacity <= 0) particles.splice(index, 1);
-  });
-  requestAnimationFrame(animate);
+/* Canvas */
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  cursor: default;
+  transition: cursor 0.2s;
 }
 
-function createTextExplosion(x, y) {
-  const texts = ["Thơm", "Thúi"];
-  const textContent = texts[Math.floor(Math.random() * texts.length)];
-  const text = document.createElement("div");
-  text.className = "text-explosion";
-  text.innerText = textContent;
-  text.style.left = `${x}px`;
-  text.style.top = `${y}px`;
-  document.body.appendChild(text);
-
-  const colorHsl = { h: Math.random() * 100 + 200, s: 85, l: document.body.classList.contains("dark-mode") ? 40 : 65 };
-  for (let i = 0; i < (isMobile ? 10 : 20); i++) {
-    particles.push(new TextParticle(x, y, colorHsl));
-  }
-
-  gsap.fromTo(text, 
-    { scale: 0.5, opacity: 1, rotation: Math.random() * 90 - 45 },
-    { scale: isMobile ? 3.5 : 3, opacity: 0, duration: isMobile ? 2.2 : 2, ease: "power4.out", onComplete: () => text.remove() }
-  );
+#canvas.interactive {
+  cursor: pointer;
 }
 
-function createExplosion(x, y, colorHsl) {
-  const particleCount = isMobile ? 30 : 50;
-  for (let i = 0; i < particleCount; i++) {
-    particles.push(new Particle(x, y, colorHsl));
-  }
+/* Hiệu ứng chữ nổ */
+.text-explosion {
+  position: absolute;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10vw;
+  font-weight: 900;
+  color: var(--text-explosion-color);
+  -webkit-text-stroke: var(--text-explosion-stroke);
+  text-shadow: var(--text-explosion-shadow);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 1;
+  transform-origin: center;
 }
 
-function handleExplosion(e, isTouch = false) {
-  const rect = canvas.getBoundingClientRect();
-  const eventX = isTouch ? e.touches[0].clientX : e.clientX;
-  const eventY = isTouch ? e.touches[0].clientY : e.clientY;
-  mouse.x = eventX - rect.left;
-  mouse.y = eventY - rect.top;
-
-  let exploded = false;
-  for (let i = 0; i < hearts.length; i++) {
-    const heart = hearts[i];
-    const dx = mouse.x - heart.x;
-    const dy = mouse.y - heart.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < heart.size + (isMobile ? 30 : 20)) {
-      createExplosion(heart.x, heart.y, heart.colorHsl);
-      createTextExplosion(mouse.x, mouse.y);
-      hearts.splice(i, 1);
-      hearts.push(new Heart());
-      heartCount++;
-      countElement.textContent = heartCount;
-      exploded = true;
-      break; // Chỉ nổ một quả bóng
-    }
-  }
-  if (isTouch && exploded) {
-    e.preventDefault();
-  }
+/* Media query cho di động */
+@media (max-width: 768px) {
+  #title { font-size: 11vw; }
+  .text-explosion { font-size: 14vw; -webkit-text-stroke: 1.2px #fff; }
+  .dark-mode-toggle, .heart-counter { font-size: 1.4em; padding: 8px; }
 }
-
-canvas.addEventListener("mousemove", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  mouse.x = e.clientX - rect.left;
-  mouse.y = e.clientY - rect.top;
-});
-
-canvas.addEventListener("click", (e) => handleExplosion(e));
-
-canvas.addEventListener("touchstart", (e) => handleExplosion(e, true));
-
-darkModeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-  if (document.body.classList.contains("dark-mode")) {
-    localStorage.setItem("darkMode", "enabled");
-    toggleIcon.textContent = "🌙";
-    hearts.forEach(heart => heart.colorHsl.l = 40);
-  } else {
-    localStorage.setItem("darkMode", "disabled");
-    toggleIcon.textContent = "☀️";
-    hearts.forEach(heart => heart.colorHsl.l = 65);
-  }
-});
-
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
-
-init();
-animate();
