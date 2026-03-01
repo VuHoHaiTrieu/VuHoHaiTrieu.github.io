@@ -21,29 +21,25 @@ class Heart {
     this.size = Math.random() * (isMobile ? 30 : 40) + (isMobile ? 20 : 25);
     this.baseSize = this.size;
     this.speedY = -(Math.random() * 2 + 1.5);
-    this.colorHsl = { 
-      h: Math.random() * 100 + 200, 
-      s: 85, 
-      l: document.body.classList.contains("dark-mode") ? 40 : 65 
-    };
+    this.colorHsl = { h: Math.random() * 100 + 200, s: 85, l: document.body.classList.contains("dark-mode") ? 40 : 65 };
     this.angle = Math.random() * 0.03;
     this.glow = 0;
     this.rotation = 0;
-    this.opacity = 0; // Fade in mới
+    this.opacity = 0; // Thêm fade-in nhẹ
   }
 
   update() {
     this.y += this.speedY;
     this.x += Math.sin(this.angle += 0.025) * 2;
     this.rotation += 0.01;
-    this.glow = Math.sin(Date.now() * 0.002) * 35 + 35; // Pulse mạnh hơn, tinh tế
+    this.glow = Math.sin(Date.now() * 0.004) * 25 + 25; // Pulse giống code cũ, hơi tăng nhẹ
 
-    if (this.opacity < 1) this.opacity += 0.015; // Fade in chậm
+    if (this.opacity < 1) this.opacity += 0.02; // Fade in chậm khi spawn
 
     if (this.y < -this.size * 2) {
       this.y = canvas.height + this.size * 2;
       this.x = Math.random() * canvas.width;
-      this.opacity = 0; // Reset fade khi loop lại
+      this.opacity = 0;
     }
   }
 
@@ -52,11 +48,9 @@ class Heart {
     ctx.globalAlpha = this.opacity;
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rotation);
-
     const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
     gradient.addColorStop(0, 'rgba(255,255,255,0.9)');
     gradient.addColorStop(1, `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`);
-
     ctx.beginPath();
     ctx.moveTo(0, -this.size / 2);
     ctx.bezierCurveTo(-this.size, -this.size * 0.8, -this.size * 1.2, this.size / 3, 0, this.size * 0.9);
@@ -65,18 +59,15 @@ class Heart {
     ctx.shadowBlur = this.glow;
     ctx.shadowColor = `hsl(${this.colorHsl.h}, ${this.colorHsl.s}%, ${this.colorHsl.l}%)`;
     ctx.fill();
-
     ctx.beginPath();
     ctx.arc(-this.size / 4, -this.size / 4, this.size / 4, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     ctx.fill();
-
     ctx.restore();
   }
 }
 
-// Các class Particle, TextParticle giữ nguyên (copy từ code cũ của bạn)
-
+// Particle và TextParticle giữ nguyên như code cũ của bạn
 class Particle {
   constructor(x, y, colorHsl) {
     this.x = x;
@@ -138,28 +129,24 @@ class TextParticle {
 }
 
 function init() {
-  const heartCountInit = isMobile ? 25 : 60; // Tăng để dày đặc, lung linh hơn
+  const heartCountInit = isMobile ? 20 : 40; // Giữ nguyên như code cũ
   for (let i = 0; i < heartCountInit; i++) {
     hearts.push(new Heart());
   }
 
-  // Khôi phục dark mode
   if (localStorage.getItem("darkMode") === "enabled") {
     document.body.classList.add("dark-mode");
     toggleIcon.textContent = "🌙";
     hearts.forEach(heart => heart.colorHsl.l = 40);
   }
 
-  // GSAP fade out title sau 5 giây
+  // Fade out title sau 5 giây bằng GSAP
   gsap.to("#title", {
     opacity: 0,
-    y: -50,
-    duration: 2.5,
+    y: -40,
+    duration: 2,
     delay: 5,
-    ease: "power2.in",
-    onComplete: () => {
-      document.getElementById("title").style.pointerEvents = "none"; // Ẩn hẳn
-    }
+    ease: "power2.in"
   });
 }
 
@@ -174,7 +161,7 @@ function animate() {
     const dx = mouse.x - h.x;
     const dy = mouse.y - h.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
-    if (dist < h.size * 1.8) { // Phạm vi lớn hơn để cursor pointer sớm
+    if (dist < h.size + 20) { // Giữ phạm vi gần giống code cũ
       isNearHeart = true;
     }
   });
@@ -185,12 +172,7 @@ function animate() {
     if (p.opacity <= 0) particles.splice(index, 1);
   });
 
-  // Cập nhật cursor
-  if (isNearHeart) {
-    canvas.classList.add('interactive');
-  } else {
-    canvas.classList.remove('interactive');
-  }
+  canvas.classList.toggle('interactive', isNearHeart);
 
   requestAnimationFrame(animate);
 }
@@ -207,18 +189,18 @@ function createTextExplosion(x, y) {
 
   const colorHsl = { h: Math.random() * 100 + 200, s: 85, l: document.body.classList.contains("dark-mode") ? 40 : 65 };
 
-  for (let i = 0; i < (isMobile ? 12 : 25); i++) {
+  for (let i = 0; i < (isMobile ? 10 : 20); i++) {
     particles.push(new TextParticle(x, y, colorHsl));
   }
 
   gsap.fromTo(text,
-    { scale: 0.4, opacity: 1, rotation: Math.random() * 80 - 40 },
-    { scale: isMobile ? 4 : 3.5, opacity: 0, duration: isMobile ? 2.3 : 2, ease: "power4.out", onComplete: () => text.remove() }
+    { scale: 0.5, opacity: 1, rotation: Math.random() * 90 - 45 },
+    { scale: isMobile ? 3.5 : 3, opacity: 0, duration: isMobile ? 2.2 : 2, ease: "power4.out", onComplete: () => text.remove() }
   );
 }
 
 function createExplosion(x, y, colorHsl) {
-  const particleCount = isMobile ? 35 : 70; // Tăng cho nổ đẹp hơn
+  const particleCount = isMobile ? 30 : 50;
   for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle(x, y, colorHsl));
   }
@@ -232,16 +214,16 @@ function handleExplosion(e, isTouch = false) {
   mouse.y = eventY - rect.top;
 
   let exploded = false;
-  for (let i = hearts.length - 1; i >= 0; i--) { // Duyệt ngược để splice an toàn
+  for (let i = 0; i < hearts.length; i++) {
     const heart = hearts[i];
     const dx = mouse.x - heart.x;
     const dy = mouse.y - heart.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < heart.size + (isMobile ? 35 : 25)) {
+    if (distance < heart.size + (isMobile ? 30 : 20)) { // Giữ nguyên phạm vi va chạm cũ
       createExplosion(heart.x, heart.y, heart.colorHsl);
       createTextExplosion(mouse.x, mouse.y);
       hearts.splice(i, 1);
-      hearts.push(new Heart()); // Spawn mới với fade-in
+      hearts.push(new Heart());
       heartCount++;
       countElement.textContent = heartCount;
       exploded = true;
@@ -252,7 +234,6 @@ function handleExplosion(e, isTouch = false) {
   if (isTouch && exploded) e.preventDefault();
 }
 
-// Events
 canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
   mouse.x = e.clientX - rect.left;
