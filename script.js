@@ -21,7 +21,7 @@ class Heart {
     this.size = Math.random() * (isMobile ? 30 : 40) + (isMobile ? 20 : 25);
     this.baseSize = this.size;
     this.speedY = -(Math.random() * 2 + 1.5);
-    this.colorHsl = { h: 330 + Math.random() * 30, s: 85, l: document.body.classList.contains("dark-mode") ? 40 : 65 }; // Pink hues
+    this.colorHsl = { h: 330 + Math.random() * 30, s: 85, l: document.body.classList.contains("dark-mode") ? 40 : 65 };
     this.angle = Math.random() * 0.03;
     this.glow = 0;
     this.rotation = 0;
@@ -153,7 +153,13 @@ function init() {
     hearts.forEach(heart => heart.colorHsl.l = 40);
   }
 
-  gsap.to("#title", { opacity: 0, y: -30, duration: 2, delay: 5, ease: "power2.in" });
+  gsap.to("#title", {
+    opacity: 0,
+    y: -30,
+    duration: 2,
+    delay: 5,
+    ease: "power2.in"
+  });
 }
 
 function animate() {
@@ -166,7 +172,7 @@ function animate() {
 
     const dx = mouse.x - h.x;
     const dy = mouse.y - h.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
+    const dist = Math.sqrt(dx * dx + dy * dy);
     if (dist < h.size + (isMobile ? 30 : 20)) {
       isNearHeart = true;
     }
@@ -178,11 +184,7 @@ function animate() {
     if (p.opacity <= 0) particles.splice(index, 1);
   });
 
-  if (isNearHeart) {
-    canvas.classList.add('interactive');
-  } else {
-    canvas.classList.remove('interactive');
-  }
+  canvas.classList.toggle('interactive', isNearHeart);
 
   requestAnimationFrame(animate);
 }
@@ -241,9 +243,7 @@ function handleExplosion(e, isTouch = false) {
     }
   }
 
-  if (isTouch && exploded) {
-    e.preventDefault();
-  }
+  if (isTouch && exploded) e.preventDefault();
 }
 
 canvas.addEventListener("mousemove", (e) => {
@@ -257,15 +257,10 @@ canvas.addEventListener("touchstart", (e) => handleExplosion(e, true));
 
 darkModeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark-mode");
-  if (document.body.classList.contains("dark-mode")) {
-    localStorage.setItem("darkMode", "enabled");
-    toggleIcon.textContent = "🌙";
-    hearts.forEach(heart => heart.colorHsl.l = 40);
-  } else {
-    localStorage.setItem("darkMode", "disabled");
-    toggleIcon.textContent = "☀️";
-    hearts.forEach(heart => heart.colorHsl.l = 65);
-  }
+  const isDark = document.body.classList.contains("dark-mode");
+  localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
+  toggleIcon.textContent = isDark ? "🌙" : "☀️";
+  hearts.forEach(heart => heart.colorHsl.l = isDark ? 40 : 65);
 });
 
 window.addEventListener("resize", () => {
